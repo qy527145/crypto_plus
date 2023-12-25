@@ -102,13 +102,6 @@ class CryptoPlus(BaseCrypto, BaseSignature):
         key = ec.generate_private_key(curve)
         return cls(key)
 
-    def dumps(self, key_format="PEM"):
-        private_key = None
-        if self.private_key:
-            private_key = dumps_key(self.private_key, key_format)
-        public_key = dumps_key(self.public_key, key_format)
-        return private_key, public_key
-
     def dump(
         self,
         key_path="key.pem",
@@ -118,6 +111,13 @@ class CryptoPlus(BaseCrypto, BaseSignature):
         if self.private_key:
             dump_key(self.private_key, key_path, key_format)
         dump_key(self.public_key, pub_key_path, key_format)
+
+    def dumps(self, key_format="PEM"):
+        private_key = None
+        if self.private_key:
+            private_key = dumps_key(self.private_key, key_format)
+        public_key = dumps_key(self.public_key, key_format)
+        return private_key, public_key
 
     @classmethod
     def load(cls, key_path="key.pem", password=None):
