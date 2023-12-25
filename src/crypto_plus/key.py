@@ -58,7 +58,7 @@ def loads_key(key_bytes: bytes | str, password: bytes | None = None):
         return load_pem_x509_certificate(key_bytes)
     except Exception:
         pass
-    raise Exception('无法加载密钥，密钥格式或密码错误')
+    raise Exception("无法加载密钥，密钥格式或密码错误")
 
 
 def dumps_key(key: RsaKey | DsaKey | EccKey, key_format="PEM"):
