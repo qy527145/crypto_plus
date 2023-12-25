@@ -1,4 +1,0 @@
-verbose: false
-debug: false
-loglevel: warning
-logpath: /tmp/crypto_plus

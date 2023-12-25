@@ -105,7 +105,10 @@ class RSACrypto(BaseCrypto, BaseSignature):
     @staticmethod
     def dump_key(key: RSA.RsaKey, path="rsa.key", key_format="PEM"):
         with open(path, "wb") as key_file:
-            key_file.write(key.export_key(format=key_format))
+            data = key.export_key(format=key_format)
+            if isinstance(data, str):
+                data = data.encode()
+            key_file.write(data)
 
     @classmethod
     def load(cls, key_path="rsa.key", password=None) -> "RSACrypto":
@@ -303,7 +306,10 @@ class DSASignature(BaseSignature):
     @staticmethod
     def dump_key(key: DSA.DsaKey | ECC.EccKey, path="dsa.key", key_format="PEM"):
         with open(path, "wb") as key_file:
-            key_file.write(key.export_key(format=key_format))
+            data = key.export_key(format=key_format)
+            if isinstance(data, str):
+                data = data.encode()
+            key_file.write(data)
 
     @classmethod
     def load(cls, key_path="dsa.key", password=None) -> "DSASignature":
