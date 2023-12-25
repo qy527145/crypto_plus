@@ -14,26 +14,21 @@ from crypto_plus.asymmetric import CryptoPlus
         CryptoPlus.generate_rsa(3072),
     ],
 )
-def rsa(request):
+def obj(request):
     yield request.param
     os.system("del /q *.pem")
     os.system("del /q *.key")
     os.system("del /q *.crt")
 
 
-def test_encrypt(rsa):
+def test_encrypt(obj):
     plaintext = random.randbytes(10)
-    secret = rsa.encrypt(plaintext)
-    assert plaintext == rsa.decrypt(secret), plaintext
+    secret = obj.encrypt(plaintext)
+    assert plaintext == obj.decrypt(secret), plaintext
 
 
-def test_sign(rsa):
-    msg = random.randbytes(10)
-    assert rsa.verify(msg, rsa.sign(msg)), msg
-
-
-def test_dump(rsa):
-    rsa.dump(
+def test_dump(obj):
+    obj.dump(
         key_path="rsa.key",
         pub_key_path="rsa_pub.key",
     )
@@ -46,7 +41,7 @@ def test_dump(rsa):
     assert pub.verify(msg, pri.sign(msg)), msg
 
 
-def test_cert(rsa: CryptoPlus):
+def test_cert(obj: CryptoPlus):
     plaintext = random.randbytes(10)
-    rsa.dump_cert("aaa", "bbb")
-    assert rsa.decrypt(CryptoPlus.load("cert.crt").encrypt(plaintext)) == plaintext
+    obj.dump_cert("aaa", "bbb")
+    assert obj.decrypt(CryptoPlus.load("cert.crt").encrypt(plaintext)) == plaintext
