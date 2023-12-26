@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import functools
 from abc import abstractmethod
+from typing import TYPE_CHECKING
 
 from Crypto import Hash
 from Crypto.PublicKey.DSA import DsaKey
@@ -10,24 +13,27 @@ from Crypto.Signature import PKCS1_v1_5 as PKCS1_v1_5_Signature
 
 from crypto_plus.base import Base
 
+if TYPE_CHECKING:
+    from typing import Union
+
 
 class BaseSignature(Base):
     @abstractmethod
-    def sign(self, message, **kwargs):
+    def sign(self, message: "bytes", **kwargs) -> "bytes":
         pass
 
     @abstractmethod
-    def verify(self, message, signature, **kwargs):
+    def verify(self, message: "bytes", signature: "bytes", **kwargs) -> "bool":
         pass
 
 
 @functools.singledispatch
-def sign_by_key(*args, **kwargs):
-    raise NotImplementedError("Not implemented")
+def sign_by_key(key, *args, **kwargs) -> "bytes":
+    raise NotImplementedError(f"Not implemented type: {type(key)}")
 
 
 @sign_by_key.register(RsaKey)
-def _(key: RsaKey, message, hash_algorithm="SHA256", **kwargs):
+def _(key: "RsaKey", message, hash_algorithm="SHA256", **kwargs) -> "bytes":
     hash_algorithm = getattr(Hash, hash_algorithm)
     hashed_message = hash_algorithm.new(message)
     signer = PKCS1_v1_5_Signature.new(key)
@@ -38,13 +44,13 @@ def _(key: RsaKey, message, hash_algorithm="SHA256", **kwargs):
 @sign_by_key.register(DsaKey)
 @sign_by_key.register(EccKey)
 def _(
-    key: DsaKey | EccKey,
+    key: "Union[DsaKey, EccKey]",
     message,
     hash_algorithm="SHA256",
     random_k=True,
     binary=False,
     **kwargs,
-):
+) -> "bytes":
     mode = "fips-186-3" if random_k else "deterministic-rfc6979"
     encoding = "binary" if binary else "der"
     hash_algorithm = getattr(Hash, hash_algorithm)
@@ -55,12 +61,18 @@ def _(
 
 
 @functools.singledispatch
-def verify_by_key(*args, **kwargs):
-    raise NotImplementedError("Not implemented")
+def verify_by_key(key, message: "bytes", signature: "bytes", *args, **kwargs) -> "bool":
+    raise NotImplementedError(f"Not implemented type: {type(key)}")
 
 
 @verify_by_key.register(RsaKey)
-def _(key: RsaKey, message, signature, hash_algorithm="SHA256", **kwargs):
+def _(
+    key: "RsaKey",
+    message: "bytes",
+    signature: "bytes",
+    hash_algorithm="SHA256",
+    **kwargs,
+) -> "bool":
     hash_algorithm = getattr(Hash, hash_algorithm)
     hashed_message = hash_algorithm.new(message)
     verifier = PKCS1_v1_5_Signature.new(key)
@@ -70,14 +82,14 @@ def _(key: RsaKey, message, signature, hash_algorithm="SHA256", **kwargs):
 @verify_by_key.register(DsaKey)
 @verify_by_key.register(EccKey)
 def _(
-    key: DsaKey,
-    message,
-    signature,
+    key: "DsaKey",
+    message: "bytes",
+    signature: "bytes",
     hash_algorithm="SHA256",
     random_k=True,
     binary=False,
     **kwargs,
-):
+) -> "bool":
     mode = "fips-186-3" if random_k else "deterministic-rfc6979"
     encoding = "binary" if binary else "der"
     hash_algorithm = getattr(Hash, hash_algorithm)

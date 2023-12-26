@@ -1,8 +1,7 @@
 import os
-import random
 
 import pytest
-
+import util
 from crypto_plus.asymmetric import CryptoPlus
 
 
@@ -22,6 +21,17 @@ def obj(request):
     os.system("del /q *.crt")
 
 
-def test_sign(obj: CryptoPlus):
-    msg = random.randbytes(10)
-    assert obj.verify(msg, obj.sign(msg)), msg
+@pytest.fixture(
+    scope="module",
+    autouse=True,
+    params=[
+        util.randbytes(10),
+        util.randbytes(10**4),
+    ],
+)
+def plaintext(request):
+    yield request.param
+
+
+def test_sign(obj: CryptoPlus, plaintext: bytes):
+    assert obj.verify(plaintext, obj.sign(plaintext)), plaintext

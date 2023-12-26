@@ -1,9 +1,8 @@
 import os
-import random
 
 import pytest
-
-from crypto_plus.asymmetric import CryptoPlus
+import util
+from crypto_plus import CryptoPlus
 
 
 @pytest.fixture(
@@ -24,19 +23,19 @@ def obj(request):
 
 def test_dump(obj: CryptoPlus):
     obj.dump(
-        key_path="dsa.key",
-        pub_key_path="dsa_pub.key",
+        key_path="test_dump.key",
+        pub_key_path="test_dump_pub.key",
     )
-    pri = CryptoPlus.load("dsa.key")
-    pub = CryptoPlus.load("dsa_pub.key")
-    msg = random.randbytes(10)
+    pri = CryptoPlus.load("test_dump.key")
+    pub = CryptoPlus.load("test_dump_pub.key")
+    msg = util.randbytes(10)
     assert pub.verify(msg, pri.sign(msg)), msg
 
 
 def test_cert(obj: CryptoPlus):
-    plaintext = random.randbytes(10)
-    obj.dump_cert("aaa", "bbb")
-    assert CryptoPlus.load("cert.crt").verify(plaintext, obj.sign(plaintext))
+    plaintext = util.randbytes(10)
+    obj.dump_cert("test", "dump", cert_path="test_cert.crt")
+    assert CryptoPlus.load("test_cert.crt").verify(plaintext, obj.sign(plaintext))
 
 
 def test_load():

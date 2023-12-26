@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import functools
 from base64 import b64decode
 from os.path import exists
+from typing import TYPE_CHECKING
 
 from Crypto.PublicKey import DSA
 from Crypto.PublicKey import ECC
@@ -15,8 +18,11 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509 import Certificate
 from cryptography.x509 import load_pem_x509_certificate
 
+if TYPE_CHECKING:
+    from typing import Union, Optional
 
-def loads_key(key_bytes: bytes | str, password: bytes | None = None):
+
+def loads_key(key_bytes: "Union[bytes, str]", password: "Optional[bytes]" = None):
     if isinstance(key_bytes, str):
         if key_bytes.startswith("-----"):
             key_bytes = key_bytes.encode()
@@ -61,18 +67,20 @@ def loads_key(key_bytes: bytes | str, password: bytes | None = None):
     raise Exception("无法加载密钥，密钥格式或密码错误")
 
 
-def dumps_key(key: RsaKey | DsaKey | EccKey, key_format="PEM"):
+def dumps_key(
+    key: "Union[RsaKey , DsaKey , EccKey]", key_format="PEM"
+) -> "Union[bytes, str]":
     return key.export_key(format=key_format)
 
 
-def load_key(key_path: str, password: bytes | None = None):
+def load_key(key_path: str, password: "Optional[bytes]" = None):
     if not exists(key_path):
         raise Exception(f"{key_path} not found")
     with open(key_path, "rb") as f:
         return loads_key(f.read())
 
 
-def dump_key(key: RsaKey | DsaKey | EccKey, path="rsa.key", key_format="PEM"):
+def dump_key(key: "Union[RsaKey , DsaKey , EccKey]", path="rsa.key", key_format="PEM"):
     with open(path, "wb") as key_file:
         data = key.export_key(format=key_format)
         if isinstance(data, str):
@@ -87,12 +95,12 @@ class KeyPair:
 
 
 @functools.singledispatch
-def construct_keypair(key, *args, **kwargs) -> KeyPair:
+def construct_keypair(key, *args, **kwargs) -> "KeyPair":
     raise NotImplementedError(f"Not implemented type: {type(key)}")
 
 
 @construct_keypair.register(rsa.RSAPrivateKey)
-def _(key: rsa.RSAPrivateKey):
+def _(key: "rsa.RSAPrivateKey") -> "KeyPair":
     private_key = RSA.construct(
         (
             key.private_numbers().public_numbers.n,
@@ -109,7 +117,7 @@ def _(key: rsa.RSAPrivateKey):
 
 
 @construct_keypair.register(rsa.RSAPublicKey)
-def _(key: rsa.RSAPublicKey):
+def _(key: "rsa.RSAPublicKey") -> "KeyPair":
     public_key = RSA.construct(
         (
             key.public_numbers().n,
@@ -120,7 +128,7 @@ def _(key: rsa.RSAPublicKey):
 
 
 @construct_keypair.register(dsa.DSAPrivateKey)
-def _(key: dsa.DSAPrivateKey):
+def _(key: "dsa.DSAPrivateKey") -> "KeyPair":
     private_numbers = key.private_numbers()
     private_key = DSA.construct(
         (
@@ -136,7 +144,7 @@ def _(key: dsa.DSAPrivateKey):
 
 
 @construct_keypair.register(dsa.DSAPublicKey)
-def _(key: dsa.DSAPublicKey):
+def _(key: "dsa.DSAPublicKey") -> "KeyPair":
     public_key = DSA.construct(
         (
             key.public_numbers().y,
@@ -149,7 +157,7 @@ def _(key: dsa.DSAPublicKey):
 
 
 @construct_keypair.register(ec.EllipticCurvePrivateKey)
-def _(key: ec.EllipticCurvePrivateKey):
+def _(key: "ec.EllipticCurvePrivateKey") -> "KeyPair":
     private_key: ECC.EccKey = ECC.construct(
         curve=key.curve.name,
         d=key.private_numbers().private_value,
@@ -161,7 +169,7 @@ def _(key: ec.EllipticCurvePrivateKey):
 
 
 @construct_keypair.register(ec.EllipticCurvePublicKey)
-def _(key: ec.EllipticCurvePublicKey):
+def _(key: "ec.EllipticCurvePublicKey") -> "KeyPair":
     public_key = ECC.construct(
         curve=key.curve.name,
         point_x=key.public_numbers().x,
@@ -171,5 +179,5 @@ def _(key: ec.EllipticCurvePublicKey):
 
 
 @construct_keypair.register(Certificate)
-def _(key: Certificate):
+def _(key: "Certificate") -> "KeyPair":
     return construct_keypair(key.public_key())
