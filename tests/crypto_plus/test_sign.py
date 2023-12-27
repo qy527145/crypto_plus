@@ -1,7 +1,8 @@
 import os
+import random
 
 import pytest
-import util
+
 from crypto_plus.asymmetric import CryptoPlus
 
 
@@ -25,8 +26,8 @@ def obj(request):
     scope="module",
     autouse=True,
     params=[
-        util.randbytes(10),
-        util.randbytes(10**4),
+        random.randbytes(10),
+        random.randbytes(10**4),
     ],
 )
 def plaintext(request):

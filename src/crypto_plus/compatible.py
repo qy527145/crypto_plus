@@ -1,5 +1,6 @@
 import builtins
 import functools
+import random
 import sys
 
 
@@ -15,6 +16,32 @@ def limit_times(times=1):
                 res = f(*args, **kwargs)
                 return res
             return
+
+        return inner
+
+    return wrapper
+
+
+def patch(min_version, patch_target, name: "str"):
+    has_old = hasattr(patch_target, name)
+    old = getattr(patch_target, name, None)
+
+    @limit_times()
+    def unpatch():
+        if has_old:
+            setattr(patch_target, name, old)
+        else:
+            delattr(patch_target, name)
+
+    @limit_times()
+    def wrapper(f):
+        @functools.wraps(f)
+        def inner(*args, **kwargs):
+            return f(*args, __old=old, **kwargs)
+
+        if sys.version_info[:2] < min_version:
+            setattr(patch_target, name, inner)
+            inner._unpatch = unpatch
 
         return inner
 
@@ -40,19 +67,18 @@ def inverse(u, v):
     return u1
 
 
-@limit_times()
-def _pow_monkey_patch():
-    old_pow = builtins.pow
-
-    def new_pow(*args):
-        if len(args) == 3 and args[1] < 0:
-            base, exponent, modulus = args
-            return pow(inverse(base, modulus), -exponent, modulus)  # noqa
-        else:
-            return old_pow(*args)
-
-    builtins.pow = new_pow
+@patch((3, 8), builtins, "pow")
+def patch_pow(*args, __old):
+    if len(args) == 3 and args[1] < 0:
+        base, exponent, modulus = args
+        return __old(inverse(base, modulus), -exponent, modulus)  # noqa
+    else:
+        return __old(*args)
 
 
-if sys.version_info[:2] < (3, 8):
-    _pow_monkey_patch()
+_inst = random.Random()
+
+
+@patch((3, 9), random, "randbytes")
+def patch_randbytes(n, __old):
+    return _inst.getrandbits(n * 8).to_bytes(n, "little")

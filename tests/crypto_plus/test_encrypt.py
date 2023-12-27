@@ -1,7 +1,8 @@
 import os
+import random
 
 import pytest
-import util
+
 from crypto_plus import CryptoPlus
 from crypto_plus.encrypt import encrypt_by_key, decrypt_by_key
 
@@ -27,8 +28,8 @@ def obj(request):
     scope="module",
     autouse=True,
     params=[
-        util.randbytes(10),
-        util.randbytes(10**4),
+        random.randbytes(10),
+        random.randbytes(10**4),
     ],
 )
 def plaintext(request):
