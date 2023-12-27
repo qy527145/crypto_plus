@@ -1,21 +1,46 @@
 # Crypto Plus
 
-## 1. Overview
+## 1. 概览
 
-A Easy-to-use Crypto Tool
+一个易用的加解密、签名、证书工具
 
-## 2. Usage
+## 2. 使用
 
-### 2.1 init project
+### 2.1 安装
 
 ```bash
-poetry install -v
+pip install crypto_plus
 ```
 
-### 2.2 usage
+### 2.2 使用
 
-TODO
+```python
+from crypto_plus import CryptoPlus
 
-## 3. Develop
+# 目前支持RSA、DSA、ECDSA
+rsa = CryptoPlus.generate_rsa()
+# dsa = CryptoPlus.generate_dsa()
+# ecdsa = CryptoPlus.generate_ecdsa()
 
-You may need to read the [develop document](./docs/development.md) to use SRC Layout in your IDE.
+# 加解密
+plaintext = b'plaintext bytes'
+ciphertext = rsa.encrypt(plaintext)
+assert rsa.decrypt(ciphertext) == ciphertext
+
+# 签名、验签
+message = b'message bytes'
+signature = rsa.sign(message)
+rsa.verify(message, signature)
+
+# 导出自签名证书
+rsa.dump_cert(subject_name="subject", issuer_name="issuer")
+
+# 导入导出文件
+rsa.dump()
+rsa_from_file = CryptoPlus.load()
+
+```
+
+## 3. 开发
+
+阅读 [开发手册](./docs/development.md).

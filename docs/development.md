@@ -1,33 +1,42 @@
-# Begin
+# 开发手册
 
-## Init project environment
+## 初始化环境
 
-- git init
-- git config
-- poetry install
-- git commit
+- 准备
 
-## Develop
+```bash
+pip install poetry
+```
 
-- code
-- git commit
-- tox
+- 克隆仓库
+
+```shell script
+git clone https://github.com/qy527145/crypto_plus.git
+```
+
+- 安装依赖
+
+```shell script
+# 安装依赖
+poetry install -v
+# 安装git钩子
+pre-commit install
+```
 
 ## Delivery
 
-### Run tox
-
-Run tox to format code style and check test.
+### 测试
 
 ```shell script
+# 规范化代码
+pre-commit run -a
+# 多版本测试
 tox
 ```
 
-### Git tag
+### Git 标签
 
-Modify package version value, then commit.
-
-Add tag
+添加标签
 
 ```shell script
 git tag -a v0.1.0
@@ -35,21 +44,21 @@ git tag -a v0.1.0
 
 ### Build
 
-Build this tag distribution package.
+构件包
 
 ```shell script
 poetry build
 ```
 
-### Upload index server
+### 发布
 
-Upload to pypi server, or pass `--repository https://pypi.org/simple` to specify index server.
+发布到pypi, 可以使用 `--repository https://pypi.org/simple` 指定远程包仓库
 
 ```shell script
 poetry publish
 ```
 
-## Develop guide
+## 开发手册
 
 ### Pycharm Configuration
 
@@ -70,4 +79,5 @@ In the upper right corner of Pycharm window, then delete configuration.
 
 ### Others
 
-You should confirm `src` directory in `sys.path`. You can add it by `sys.path.extend(['/tmp/demo/src'])` if it not exist.
+You should confirm `src` directory in `sys.path`. You can add it by `sys.path.extend(['/tmp/demo/src'])` if it not
+exist.
