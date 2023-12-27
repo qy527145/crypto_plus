@@ -71,7 +71,7 @@ def inverse(u, v):
 def patch_pow(*args, __old):
     if len(args) == 3 and args[1] < 0:
         base, exponent, modulus = args
-        return __old(inverse(base, modulus), -exponent, modulus)  # noqa
+        return __old(inverse(base, modulus), -exponent, modulus)
     else:
         return __old(*args)
 

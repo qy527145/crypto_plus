@@ -36,8 +36,8 @@ def fast_pow_factor(key: "RsaKey"):
     p = key.p
     q = key.q
     u = key.u
-    dp = key.dp  # noqa
-    dq = key.dq  # noqa
+    dp = key.dp
+    dq = key.dq
     _p = p * pow(p, -1, q) % n
     _q = q * pow(q, -1, p) % n
     r = random.randint(1, n)
@@ -51,7 +51,7 @@ def fast_pow_factor(key: "RsaKey"):
         mp = h * p + m1
         return (mp * _r) % key.n
 
-    def _fast_pow2(base: "int"):  # noqa
+    def _fast_pow2(base: "int"):
         return _fast_pow1(Integer(base))
 
     def _fast_pow3(base: "Union[Integer, int]"):

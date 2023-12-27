@@ -32,7 +32,7 @@ def loads_key(
         else:
             try:
                 key_bytes = b64decode(key_bytes)
-            except:  # noqa
+            except Exception:
                 key_bytes = key_bytes.encode()
 
     try:
