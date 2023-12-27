@@ -2,7 +2,6 @@ import os
 import random
 
 import pytest
-
 from crypto_plus import CryptoPlus
 
 
@@ -36,7 +35,9 @@ def test_dump(obj: CryptoPlus):
 def test_cert(obj: CryptoPlus):
     plaintext = random.randbytes(10)
     obj.dump_cert("test", "dump", cert_path="test_cert.crt")
-    assert CryptoPlus.load("test_cert.crt").verify(plaintext, obj.sign(plaintext))
+    assert CryptoPlus.load("test_cert.crt").verify(
+        plaintext, obj.sign(plaintext)
+    )
 
 
 def test_load():

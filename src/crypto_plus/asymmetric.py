@@ -14,20 +14,22 @@ from cryptography.x509 import NameAttribute
 from cryptography.x509 import random_serial_number
 from cryptography.x509.oid import NameOID
 
-from crypto_plus.encrypt import BaseCrypto, encrypt_by_key, decrypt_by_key
-from crypto_plus.key import (
-    loads_key,
-    dump_key,
-    construct_keypair,
-    load_key,
-    dumps_key,
-    KeyPair,
-)
+from crypto_plus.encrypt import BaseCrypto
+from crypto_plus.encrypt import decrypt_by_key
+from crypto_plus.encrypt import encrypt_by_key
+from crypto_plus.key import KeyPair
+from crypto_plus.key import construct_keypair
+from crypto_plus.key import dump_key
+from crypto_plus.key import dumps_key
+from crypto_plus.key import load_key
+from crypto_plus.key import loads_key
 from crypto_plus.sign import BaseSignature
-from crypto_plus.sign import sign_by_key, verify_by_key
+from crypto_plus.sign import sign_by_key
+from crypto_plus.sign import verify_by_key
 
 if TYPE_CHECKING:
-    from typing import Union, Optional
+    from typing import Optional
+    from typing import Union
 
 
 class CryptoPlus(BaseCrypto, BaseSignature):
@@ -106,7 +108,9 @@ class CryptoPlus(BaseCrypto, BaseSignature):
 
     # ECDSA
     @classmethod
-    def generate_ecdsa(cls, curve: ec.EllipticCurve = ec.SECP256R1) -> "CryptoPlus":
+    def generate_ecdsa(
+        cls, curve: ec.EllipticCurve = ec.SECP256R1
+    ) -> "CryptoPlus":
         key = ec.generate_private_key(curve)
         return cls(key)
 
@@ -136,7 +140,11 @@ class CryptoPlus(BaseCrypto, BaseSignature):
         return cls(loads_key(key, password))
 
     def dump_cert(
-        self, subject_name: "str", issuer_name: "str", days=36500, cert_path="cert.crt"
+        self,
+        subject_name: "str",
+        issuer_name: "str",
+        days=36500,
+        cert_path="cert.crt",
     ):
         with open(cert_path, "wb") as f:
             f.write(self.dumps_cert(subject_name, issuer_name, days=days))

@@ -2,9 +2,9 @@ import os
 import random
 
 import pytest
-
 from crypto_plus import CryptoPlus
-from crypto_plus.encrypt import encrypt_by_key, decrypt_by_key
+from crypto_plus.encrypt import decrypt_by_key
+from crypto_plus.encrypt import encrypt_by_key
 
 
 @pytest.fixture(

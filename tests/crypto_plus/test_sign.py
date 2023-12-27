@@ -2,7 +2,6 @@ import os
 import random
 
 import pytest
-
 from crypto_plus.asymmetric import CryptoPlus
 
 

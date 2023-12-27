@@ -61,7 +61,9 @@ def _(
 
 
 @functools.singledispatch
-def verify_by_key(key, message: "bytes", signature: "bytes", *args, **kwargs) -> "bool":
+def verify_by_key(
+    key, message: "bytes", signature: "bytes", *args, **kwargs
+) -> "bool":
     raise NotImplementedError(f"Not implemented type: {type(key)}")
 
 

@@ -19,10 +19,13 @@ from cryptography.x509 import Certificate
 from cryptography.x509 import load_pem_x509_certificate
 
 if TYPE_CHECKING:
-    from typing import Union, Optional
+    from typing import Optional
+    from typing import Union
 
 
-def loads_key(key_bytes: "Union[bytes, str]", password: "Optional[bytes]" = None):
+def loads_key(
+    key_bytes: "Union[bytes, str]", password: "Optional[bytes]" = None
+):
     if isinstance(key_bytes, str):
         if key_bytes.startswith("-----"):
             key_bytes = key_bytes.encode()
@@ -80,7 +83,9 @@ def load_key(key_path: str, password: "Optional[bytes]" = None):
         return loads_key(f.read())
 
 
-def dump_key(key: "Union[RsaKey , DsaKey , EccKey]", path="rsa.key", key_format="PEM"):
+def dump_key(
+    key: "Union[RsaKey , DsaKey , EccKey]", path="rsa.key", key_format="PEM"
+):
     with open(path, "wb") as key_file:
         data = key.export_key(format=key_format)
         if isinstance(data, str):

@@ -1,0 +1,37 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-ast
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-symlinks
+
+  - repo: local
+    hooks:
+      - id: ruff
+        name: ruff
+        description: "Run 'ruff' for extremely fast Python linting"
+        entry: ruff check --fix --force-exclude
+        language: python
+        types_or: [python, pyi]
+        args: []
+        require_serial: true
+        additional_dependencies: []
+        minimum_pre_commit_version: "2.9.2"
+      - id: ruff-format
+        name: ruff-format
+        description: "Run 'ruff format' for extremely fast Python formatting"
+        entry: ruff format --force-exclude
+        language: python
+        types_or: [python, pyi]
+        args: []
+        require_serial: true
+        additional_dependencies: []
+        minimum_pre_commit_version: "2.9.2"

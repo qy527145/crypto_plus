@@ -10,7 +10,8 @@ from Crypto.Math.Numbers import Integer
 from Crypto.PublicKey.DSA import DsaKey
 from Crypto.PublicKey.ECC import EccKey
 from Crypto.PublicKey.RSA import RsaKey
-from Crypto.Util.number import bytes_to_long, long_to_bytes
+from Crypto.Util.number import bytes_to_long
+from Crypto.Util.number import long_to_bytes
 
 from crypto_plus.base import Base
 
@@ -89,7 +90,9 @@ def _(key: "RsaKey", message: "bytes", **kwargs):
         _fast_pow = fast_pow_factor(key)
         for i in range(1 + (len(message) - 1) // max_segment_len):
             # 分段加密
-            plaintext_part = message[i * max_segment_len : (i + 1) * max_segment_len]
+            plaintext_part = message[
+                i * max_segment_len : (i + 1) * max_segment_len
+            ]
             pad_len = key.size_in_bytes() - len(plaintext_part) - 3
             # 填充后加密
             plaintext_part_padding = bytes_to_long(
@@ -98,13 +101,17 @@ def _(key: "RsaKey", message: "bytes", **kwargs):
             ciphertext_part = _fast_pow(plaintext_part_padding)
 
             # encrypt_data = encrypt_data.to_bytes(1 + encrypt_data.bit_length() // 8)
-            ciphertext_part = ciphertext_part.to_bytes(key.public_key().size_in_bytes())
+            ciphertext_part = ciphertext_part.to_bytes(
+                key.public_key().size_in_bytes()
+            )
             res.append(ciphertext_part)
     else:
         cipher = PKCS1_v1_5_Cipher.new(key)
         for i in range(1 + (len(message) - 1) // max_segment_len):
             res.append(
-                cipher.encrypt(message[i * max_segment_len : (i + 1) * max_segment_len])
+                cipher.encrypt(
+                    message[i * max_segment_len : (i + 1) * max_segment_len]
+                )
             )
     return b"".join(res)
 
@@ -127,7 +134,9 @@ def _(key: "RsaKey", message: "bytes", **kwargs):
     if key.has_private():
         cipher = PKCS1_v1_5_Cipher.new(key)
         for i in range(1 + (len(message) - 1) // seg_len):
-            res.append(cipher.decrypt(message[i * seg_len : (i + 1) * seg_len], None))
+            res.append(
+                cipher.decrypt(message[i * seg_len : (i + 1) * seg_len], None)
+            )
     else:
         # 公钥解密（不建议）
         for i in range(1 + (len(message) - 1) // seg_len):
@@ -138,7 +147,9 @@ def _(key: "RsaKey", message: "bytes", **kwargs):
                 key.size_in_bytes(),
             )
             # 去除填充字节
-            plaintext_part = plaintext_part[plaintext_part.find(b"\x00", 10) + 1 :]
+            plaintext_part = plaintext_part[
+                plaintext_part.find(b"\x00", 10) + 1 :
+            ]
             res.append(plaintext_part)
     return b"".join(res)
 
