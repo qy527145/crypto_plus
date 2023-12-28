@@ -8,6 +8,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import dsa
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.x509 import Certificate
 from cryptography.x509 import CertificateBuilder
 from cryptography.x509 import Name
 from cryptography.x509 import NameAttribute
@@ -150,8 +151,10 @@ class CryptoPlus(BaseCrypto, BaseSignature):
             f.write(self.dumps_cert(subject_name, issuer_name, days=days))
 
     def dumps_cert(
-        self, subject_name: "str", issuer_name: "str", days=36500
+        self, subject_name="", issuer_name="", days=36500
     ) -> "bytes":
+        if isinstance(self.raw_private_key, Certificate):
+            return self.raw_private_key.public_bytes(serialization.Encoding.PEM)
         if not self.private_key:
             raise Exception("私钥缺失")
         today = datetime.datetime.today()

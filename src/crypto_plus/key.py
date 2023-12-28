@@ -95,8 +95,23 @@ def dump_key(
 
 class KeyPair:
     def __init__(self, private_key, public_key):
-        self.private_key = private_key
-        self.public_key = public_key
+        self.private_key: """Union[
+            rsa.RSAPrivateKey,
+            dsa.DSAPrivateKey,
+            ec.EllipticCurvePrivateKey,
+            Certificate,
+            RsaKey,
+            DsaKey,
+            EccKey,
+        ]""" = private_key
+        self.public_key: """Union[
+            rsa.RSAPublicKey,
+            dsa.DSAPublicKey,
+            ec.EllipticCurvePublicKey,
+            RsaKey,
+            DsaKey,
+            EccKey,
+        ]""" = public_key
 
 
 @functools.singledispatch
