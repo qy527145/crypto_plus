@@ -1,9 +1,8 @@
-from __future__ import annotations
-
 import functools
 from base64 import b64decode
 from os.path import exists
-from typing import TYPE_CHECKING
+from typing import Optional
+from typing import Union
 
 from Crypto.PublicKey import DSA
 from Crypto.PublicKey import ECC
@@ -18,14 +17,8 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509 import Certificate
 from cryptography.x509 import load_pem_x509_certificate
 
-if TYPE_CHECKING:
-    from typing import Optional
-    from typing import Union
 
-
-def loads_key(
-    key_bytes: "Union[bytes, str]", password: "Optional[bytes]" = None
-):
+def loads_key(key_bytes: Union[bytes, str], password: Optional[bytes] = None):
     if isinstance(key_bytes, str):
         if key_bytes.startswith("-----"):
             key_bytes = key_bytes.encode()
@@ -71,12 +64,12 @@ def loads_key(
 
 
 def dumps_key(
-    key: "Union[RsaKey , DsaKey , EccKey]", key_format="PEM"
-) -> "Union[bytes, str]":
+    key: Union[RsaKey, DsaKey, EccKey], key_format="PEM"
+) -> Union[bytes, str]:
     return key.export_key(format=key_format)
 
 
-def load_key(key_path: str, password: "Optional[bytes]" = None):
+def load_key(key_path: str, password: Optional[bytes] = None):
     if not exists(key_path):
         raise Exception(f"{key_path} not found")
     with open(key_path, "rb") as f:
@@ -84,7 +77,7 @@ def load_key(key_path: str, password: "Optional[bytes]" = None):
 
 
 def dump_key(
-    key: "Union[RsaKey , DsaKey , EccKey]", path="rsa.key", key_format="PEM"
+    key: Union[RsaKey, DsaKey, EccKey], path="rsa.key", key_format="PEM"
 ):
     with open(path, "wb") as key_file:
         data = key.export_key(format=key_format)
@@ -95,7 +88,7 @@ def dump_key(
 
 class KeyPair:
     def __init__(self, private_key, public_key):
-        self.private_key: """Union[
+        self.private_key: Union[
             rsa.RSAPrivateKey,
             dsa.DSAPrivateKey,
             ec.EllipticCurvePrivateKey,
@@ -103,15 +96,15 @@ class KeyPair:
             RsaKey,
             DsaKey,
             EccKey,
-        ]""" = private_key
-        self.public_key: """Union[
+        ] = private_key
+        self.public_key: Union[
             rsa.RSAPublicKey,
             dsa.DSAPublicKey,
             ec.EllipticCurvePublicKey,
             RsaKey,
             DsaKey,
             EccKey,
-        ]""" = public_key
+        ] = public_key
 
 
 @functools.singledispatch

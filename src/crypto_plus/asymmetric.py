@@ -1,7 +1,6 @@
-from __future__ import annotations
-
 import datetime
-from typing import TYPE_CHECKING
+from typing import Optional
+from typing import Union
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
@@ -28,22 +27,18 @@ from crypto_plus.sign import BaseSignature
 from crypto_plus.sign import sign_by_key
 from crypto_plus.sign import verify_by_key
 
-if TYPE_CHECKING:
-    from typing import Optional
-    from typing import Union
-
 
 class CryptoPlus(BaseCrypto, BaseSignature):
     def __init__(
         self,
-        key: """Union[
+        key: Union[
             rsa.RSAPrivateKey,
             rsa.RSAPublicKey,
             dsa.DSAPrivateKey,
             dsa.DSAPublicKey,
             ec.EllipticCurvePrivateKey,
             ec.EllipticCurvePublicKey,
-        ]""",
+        ],
     ):
         super().__init__()
         self.key = key
@@ -80,10 +75,10 @@ class CryptoPlus(BaseCrypto, BaseSignature):
         cls,
         *,
         e=65537,
-        d: "Optional[int]" = None,
-        n: "Optional[int]" = None,
-        p: "Optional[int]" = None,
-        q: "Optional[int]" = None,
+        d: Optional[int] = None,
+        n: Optional[int] = None,
+        p: Optional[int] = None,
+        q: Optional[int] = None,
     ) -> "CryptoPlus":
         if not p or not q:
             p, q = rsa.rsa_recover_prime_factors(n, e, d)
@@ -133,26 +128,24 @@ class CryptoPlus(BaseCrypto, BaseSignature):
         return private_key, public_key
 
     @classmethod
-    def load(cls, key_path="key.pem", password=None):
+    def load(cls, key_path="key.pem", password=None) -> "CryptoPlus":
         return cls(load_key(key_path, password))
 
     @classmethod
-    def loads(cls, key: "Union[bytes, str]", password=None):
+    def loads(cls, key: Union[bytes, str], password=None) -> "CryptoPlus":
         return cls(loads_key(key, password))
 
     def dump_cert(
         self,
-        subject_name: "str",
-        issuer_name: "str",
+        subject_name: str,
+        issuer_name: str,
         days=36500,
         cert_path="cert.crt",
     ):
         with open(cert_path, "wb") as f:
             f.write(self.dumps_cert(subject_name, issuer_name, days=days))
 
-    def dumps_cert(
-        self, subject_name="", issuer_name="", days=36500
-    ) -> "bytes":
+    def dumps_cert(self, subject_name="", issuer_name="", days=36500) -> bytes:
         if isinstance(self.raw_private_key, Certificate):
             return self.raw_private_key.public_bytes(serialization.Encoding.PEM)
         if not self.private_key:
@@ -188,12 +181,12 @@ class CryptoPlus(BaseCrypto, BaseSignature):
         return certificate.public_bytes(serialization.Encoding.PEM)
 
     # 常规方法
-    def encrypt(self, message: "bytes") -> "bytes":
+    def encrypt(self, message: bytes) -> bytes:
         if not message:
             return b""
         return encrypt_by_key(self.public_key, message)
 
-    def decrypt(self, message: bytes) -> "bytes":
+    def decrypt(self, message: bytes) -> bytes:
         if not message:
             return b""
         if not self.private_key:
@@ -202,11 +195,11 @@ class CryptoPlus(BaseCrypto, BaseSignature):
 
     def sign(
         self,
-        message: "bytes",
+        message: bytes,
         hash_algorithm="SHA256",
         random_k=True,
         binary=False,
-    ) -> "bytes":
+    ) -> bytes:
         if not self.private_key:
             raise Exception("私钥缺失")
         return sign_by_key(
@@ -219,12 +212,12 @@ class CryptoPlus(BaseCrypto, BaseSignature):
 
     def verify(
         self,
-        message: "bytes",
-        signature: "bytes",
+        message: bytes,
+        signature: bytes,
         hash_algorithm="SHA256",
         random_k=True,
         binary=False,
-    ) -> "bool":
+    ) -> bool:
         return verify_by_key(
             self.public_key,
             message,

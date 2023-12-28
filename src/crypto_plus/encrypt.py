@@ -1,9 +1,7 @@
-from __future__ import annotations
-
 import functools
 import random
 from abc import abstractmethod
-from typing import TYPE_CHECKING
+from typing import Union
 
 from Crypto.Cipher import PKCS1_v1_5 as PKCS1_v1_5_Cipher
 from Crypto.Math.Numbers import Integer
@@ -15,11 +13,8 @@ from Crypto.Util.number import long_to_bytes
 
 from crypto_plus.base import Base
 
-if TYPE_CHECKING:
-    from typing import Union
 
-
-def fast_pow(base: "Union[Integer, int]", exponent: "int", p: "int", q: "int"):
+def fast_pow(base: Union[Integer, int], exponent: int, p: int, q: int):
     # 加速模幂运算
     # return pow(base, exponent, p * q)
     # 扩展辗转相除（比pow快3倍左右）
@@ -29,7 +24,7 @@ def fast_pow(base: "Union[Integer, int]", exponent: "int", p: "int", q: "int"):
     return (mq * p * pow(p, -1, q) % n + mp * q * pow(q, -1, p) % n) % n
 
 
-def fast_pow_factor(key: "RsaKey"):
+def fast_pow_factor(key: RsaKey):
     n = key.n
     e = key.e
     # d = key.d
@@ -43,7 +38,7 @@ def fast_pow_factor(key: "RsaKey"):
     r = random.randint(1, n)
     _r = fast_pow(r, -1, p, q)
 
-    def _fast_pow1(base: "Union[Integer, int]"):
+    def _fast_pow1(base: Union[Integer, int]):
         cp = base * fast_pow(r, e, p, q) % n
         m1 = pow(cp, dp, p)
         m2 = pow(cp, dq, q)
@@ -51,15 +46,15 @@ def fast_pow_factor(key: "RsaKey"):
         mp = h * p + m1
         return (mp * _r) % key.n
 
-    def _fast_pow2(base: "int"):
+    def _fast_pow2(base: int):
         return _fast_pow1(Integer(base))
 
-    def _fast_pow3(base: "Union[Integer, int]"):
+    def _fast_pow3(base: Union[Integer, int]):
         mp = pow(base, dp, p)
         mq = pow(base, dq, q)
         return (mq * _p % n + mp * _q % n) % n
 
-    def _fast_pow4(base: "int"):
+    def _fast_pow4(base: int):
         return _fast_pow3(Integer(base))
 
     return _fast_pow4
@@ -67,21 +62,21 @@ def fast_pow_factor(key: "RsaKey"):
 
 class BaseCrypto(Base):
     @abstractmethod
-    def encrypt(self, message: "bytes"):
+    def encrypt(self, message: bytes):
         pass
 
     @abstractmethod
-    def decrypt(self, message: "bytes"):
+    def decrypt(self, message: bytes):
         pass
 
 
 @functools.singledispatch
-def encrypt_by_key(key, message: "bytes", *args, **kwargs):
+def encrypt_by_key(key, message: bytes, *args, **kwargs):
     raise NotImplementedError(f"Not implemented type: {type(key)}")
 
 
 @encrypt_by_key.register(RsaKey)
-def _(key: "RsaKey", message: "bytes", **kwargs):
+def _(key: RsaKey, message: bytes, **kwargs):
     pad = 8
     max_segment_len = key.size_in_bytes() - pad - 3
     res = []
@@ -118,7 +113,7 @@ def _(key: "RsaKey", message: "bytes", **kwargs):
 
 @encrypt_by_key.register(DsaKey)
 @encrypt_by_key.register(EccKey)
-def _(key: Union[DsaKey, EccKey], message: "bytes", **kwargs):
+def _(key: Union[DsaKey, EccKey], message: bytes, **kwargs):
     raise NotImplementedError(f"Not implemented type: {type(key)}")
 
 
@@ -128,7 +123,7 @@ def decrypt_by_key(key, message, *args, **kwargs):
 
 
 @decrypt_by_key.register(RsaKey)
-def _(key: "RsaKey", message: "bytes", **kwargs):
+def _(key: RsaKey, message: bytes, **kwargs):
     seg_len = key.size_in_bytes()
     res = []
     if key.has_private():
@@ -156,5 +151,5 @@ def _(key: "RsaKey", message: "bytes", **kwargs):
 
 @decrypt_by_key.register(DsaKey)
 @decrypt_by_key.register(EccKey)
-def _(key: "DsaKey | EccKey| str", message: "bytes", **kwargs):
+def _(key: Union[DsaKey, EccKey], message: bytes, **kwargs):
     raise NotImplementedError(f"Not implemented type: {type(key)}")

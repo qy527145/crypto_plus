@@ -22,7 +22,33 @@ def limit_times(times=1):
     return wrapper
 
 
-def patch(min_version, patch_target, name: "str"):
+def condition(cond):
+    def wrapper(f):
+        @functools.wraps(f)
+        def inner(*args, **kwargs):
+            if cond:
+                return f(*args, **kwargs)
+
+        return inner
+
+    return wrapper
+
+
+def execute_once_now(*args, **kwargs):
+    def wrapper(f):
+        @limit_times()
+        @functools.wraps(f)
+        def inner(*args1, **kwargs1):
+            return f(*args1, **kwargs1)
+
+        inner(*args, **kwargs)
+
+        return inner
+
+    return wrapper
+
+
+def patch(min_version, patch_target, name: str):
     has_old = hasattr(patch_target, name)
     old = getattr(patch_target, name, None)
 
@@ -82,3 +108,13 @@ _inst = random.Random()
 @patch((3, 9), random, "randbytes")
 def patch_randbytes(n, __old):
     return _inst.getrandbits(n * 8).to_bytes(n, "little")
+
+
+@execute_once_now()
+@condition(sys.version_info[:2] < (3, 7))
+def suppress_cryptography_warnings():
+    import warnings
+
+    warnings.filterwarnings(
+        "ignore", message="Python 3.6 is no longer supported"
+    )
