@@ -11,19 +11,19 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-#python = ">=3.12"
-#cryptography = "^41.0.7"
-python = ">=3.6"
-cryptography = "^40.0.2"
-pycryptodome = "^3.19.1"
+#python = ">=3.6"
+python = ">=3.12"
+cryptography = "*"
+pycryptodome = "*"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.4.3"
-tox = "^4.11.4"
-mkdocs = "^1.5.3"
-mkdocs-material = "^8.5.11"
-ruff = "^0.1.9"
-pre-commit = "^3.6.0"
+pytest = "*"
+tox = "*"
+mkdocs = "*"
+mkdocs-material = "*"
+ruff = "*"
+pre-commit = "*"
+
 
 [tool.poetry.scripts]
 
