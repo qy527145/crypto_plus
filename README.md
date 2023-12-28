@@ -1,8 +1,10 @@
-# Crypto Plus
+# [Crypto Plus](https://github.com/qy527145/crypto_plus)
 
 ## 1. 概览
 
-一个易用的加解密、签名、证书工具
+一个易用的加解密、签名、证书工具。
+目前已发布到[pypi](https://pypi.org/project/crypto_plus)。
+
 
 ## 2. 使用
 
