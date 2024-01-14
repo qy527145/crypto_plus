@@ -47,7 +47,7 @@ def execute_once_now(*args, **kwargs):
     return wrapper
 
 
-def patch(min_version, *, /, target=None, module=None, name=None):
+def patch(min_version, /, *, target=None, module=None, name=None):
     if target is not None:
         module = __import__(target.__module__)
         name = target.__name__
