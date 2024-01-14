@@ -1,4 +1,3 @@
-import builtins
 import functools
 import random
 import sys
@@ -48,16 +47,22 @@ def execute_once_now(*args, **kwargs):
     return wrapper
 
 
-def patch(min_version, patch_target, name: str):
-    has_old = hasattr(patch_target, name)
-    old = getattr(patch_target, name, None)
+def patch(min_version, *, /, target=None, module=None, name=None):
+    if target is not None:
+        module = __import__(target.__module__)
+        name = target.__name__
+        has_old = True
+        old = target
+    else:
+        has_old = hasattr(module, name)
+        old = getattr(module, name, None)
 
     @limit_times()
     def unpatch():
         if has_old:
-            setattr(patch_target, name, old)
+            setattr(module, name, old)
         else:
-            delattr(patch_target, name)
+            delattr(module, name)
 
     @limit_times()
     def wrapper(f):
@@ -66,7 +71,7 @@ def patch(min_version, patch_target, name: str):
             return f(*args, __old=old, **kwargs)
 
         if sys.version_info[:2] < min_version:
-            setattr(patch_target, name, inner)
+            setattr(module, name, inner)
             inner._unpatch = unpatch
 
         return inner
@@ -93,8 +98,8 @@ def inverse(u, v):
     return u1
 
 
-@patch((3, 8), builtins, "pow")
-def patch_pow(*args, __old):
+@patch((3, 8), target=pow)
+def new_pow(*args, __old):
     if len(args) == 3 and args[1] < 0:
         base, exponent, modulus = args
         return __old(inverse(base, modulus), -exponent, modulus)
@@ -105,8 +110,8 @@ def patch_pow(*args, __old):
 _inst = random.Random()
 
 
-@patch((3, 9), random, "randbytes")
-def patch_randbytes(n, __old):
+@patch((3, 9), module=random, name="randbytes")
+def new_randbytes(n, __old):
     return _inst.getrandbits(n * 8).to_bytes(n, "little")
 
 
