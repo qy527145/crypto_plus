@@ -47,7 +47,13 @@ def execute_once_now(*args, **kwargs):
     return wrapper
 
 
-def patch(min_version, /, *, target=None, module=None, name=None):
+def patch(
+    min_version,
+    # /, *,
+    target=None,
+    module=None,
+    name=None,
+):
     if target is not None:
         module = __import__(target.__module__)
         name = target.__name__
@@ -79,23 +85,17 @@ def patch(min_version, /, *, target=None, module=None, name=None):
     return wrapper
 
 
-def inverse(u, v):
-    if v == 0:
-        raise ZeroDivisionError("Modulus cannot be zero")
-    if v < 0:
-        raise ValueError("Modulus cannot be negative")
-
-    u3, v3 = u, v
-    u1, v1 = 1, 0
-    while v3 > 0:
-        q = u3 // v3
-        u1, v1 = v1, u1 - v1 * q
-        u3, v3 = v3, u3 - v3 * q
-    if u3 != 1:
-        raise ValueError("No inverse value can be computed")
-    while u1 < 0:
-        u1 = u1 + v
-    return u1
+def inverse(a, b):
+    a1, b1 = 1, 0
+    # a2, b2 = 0, 1
+    a3, b3 = a, b
+    while b3 != 0:
+        c = a3 // b3
+        a1, b1 = b1, a1 - b1 * c
+        # a2, b2 = b2, a2 - b2 * c
+        a3, b3 = b3, a3 - b3 * c
+    # return a1, a2, a3
+    return a1 % b
 
 
 @patch((3, 8), target=pow)
