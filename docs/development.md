@@ -57,27 +57,3 @@ poetry build
 ```shell script
 poetry publish
 ```
-
-## 开发手册
-
-### Pycharm Configuration
-
-Open project use Pycharm.
-
-#### Module can not import in src
-
-Check menu bar, click `File` --> `Settings` --> `Project Settings` --> `Project Structure` .
-Mark `src` and `tests` directory as sources.
-
-#### Enable pytest
-
-Click `File` --> `Settings` --> `Tools` --> `Python Integrated Tools` --> `Testing` --> `Default runner`, then select
-`pytest`.
-
-If you run test by `Unittests` before, you should delete configuration. Open `Edit Run/Debug configurations dialog` in
-In the upper right corner of Pycharm window, then delete configuration.
-
-### Others
-
-You should confirm `src` directory in `sys.path`. You can add it by `sys.path.extend(['/tmp/demo/src'])` if it not
-exist.
