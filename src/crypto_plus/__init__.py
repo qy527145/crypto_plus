@@ -1,5 +1,5 @@
 """Crypto Plus"""
-__version__ = "0.1.6"
+__version__ = "1.0.0"
 
 from . import compatible
 from .asymmetric import CryptoPlus

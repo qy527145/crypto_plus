@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "crypto_plus"
-version = "0.1.6"
+version = "1.0.0"
 description = "A Easy-to-use Crypto Tool"
 readme = "README.md"
 authors = ["wmymz <wmymz@icloud.com>"]
