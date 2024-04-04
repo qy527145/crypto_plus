@@ -180,6 +180,19 @@ class CryptoPlus(BaseCrypto, BaseSignature):
         )
         return certificate.public_bytes(serialization.Encoding.PEM)
 
+    # 非常规方法
+    def encrypt_by_private_key(self, message: bytes) -> bytes:
+        if not message:
+            return b""
+        if not self.private_key:
+            raise Exception("私钥缺失")
+        return encrypt_by_key(self.private_key, message)
+
+    def decrypt_by_public_key(self, message: bytes) -> bytes:
+        if not message:
+            return b""
+        return decrypt_by_key(self.public_key, message)
+
     # 常规方法
     def encrypt(self, message: bytes) -> bytes:
         if not message:
