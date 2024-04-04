@@ -90,8 +90,15 @@ def _(key: RsaKey, message: bytes, **kwargs):
             ]
             pad_len = key.size_in_bytes() - len(plaintext_part) - 3
             # 填充后加密
+            # 生成范围在1到255之间的随机数，确保非零字节
+            rand_pads = bytearray(pad_len)
+            for j in range(pad_len):
+                rand_pads[j] = random.randint(1, 255)
+
+            rand_pads = rand_pads[:pad_len]
             plaintext_part_padding = bytes_to_long(
-                bytes.fromhex(f'0001{"ff" * pad_len}00{plaintext_part.hex()}')
+                # bytes.fromhex(f'0001{"ff" * pad_len}00{plaintext_part.hex()}')
+                bytes.fromhex(f"0002{rand_pads.hex()}00{plaintext_part.hex()}")
             )
             ciphertext_part = _fast_pow(plaintext_part_padding)
 
