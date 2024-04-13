@@ -79,6 +79,7 @@ def encrypt_by_key(key, message: bytes, *args, **kwargs):
 def _(key: RsaKey, message: bytes, **kwargs):
     pad = 8
     max_segment_len = key.size_in_bytes() - pad - 3
+    random_padding = kwargs.get("random", False)
     res = []
     if key.has_private():
         # 私钥加密（不建议）
@@ -90,16 +91,26 @@ def _(key: RsaKey, message: bytes, **kwargs):
             ]
             pad_len = key.size_in_bytes() - len(plaintext_part) - 3
             # 填充后加密
-            # 生成范围在1到255之间的随机数，确保非零字节
-            rand_pads = bytearray(pad_len)
-            for j in range(pad_len):
-                rand_pads[j] = random.randint(1, 255)
+            if random_padding:
+                # 随机填充
+                # 生成范围在1到255之间的随机数，确保非零字节
+                rand_pads = bytearray(pad_len)
+                for j in range(pad_len):
+                    rand_pads[j] = random.randint(1, 255)
 
-            rand_pads = rand_pads[:pad_len]
-            plaintext_part_padding = bytes_to_long(
-                # bytes.fromhex(f'0001{"ff" * pad_len}00{plaintext_part.hex()}')
-                bytes.fromhex(f"0002{rand_pads.hex()}00{plaintext_part.hex()}")
-            )
+                plaintext_part_padding = bytes_to_long(
+                    # bytes.fromhex(f'0001{"ff" * pad_len}00{plaintext_part.hex()}')
+                    bytes.fromhex(
+                        f"0002{rand_pads.hex()}00{plaintext_part.hex()}"
+                    )
+                )
+            else:
+                # ff填充
+                plaintext_part_padding = bytes_to_long(
+                    bytes.fromhex(
+                        f'0001{"ff" * pad_len}00{plaintext_part.hex()}'
+                    )
+                )
             ciphertext_part = _fast_pow(plaintext_part_padding)
 
             # encrypt_data = encrypt_data.to_bytes(1 + encrypt_data.bit_length() // 8)
