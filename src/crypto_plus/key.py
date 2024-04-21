@@ -15,6 +15,7 @@ from cryptography.hazmat.primitives.asymmetric import dsa
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509 import Certificate
+from cryptography.x509 import load_der_x509_certificate
 from cryptography.x509 import load_pem_x509_certificate
 
 
@@ -58,6 +59,10 @@ def loads_key(key_bytes: Union[bytes, str], password: Optional[bytes] = None):
         pass
     try:
         return load_pem_x509_certificate(key_bytes)
+    except Exception:
+        pass
+    try:
+        return load_der_x509_certificate(key_bytes)
     except Exception:
         pass
     raise Exception("无法加载密钥，密钥格式或密码错误")
