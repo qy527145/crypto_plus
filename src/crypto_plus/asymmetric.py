@@ -38,11 +38,14 @@ class CryptoPlus(BaseCrypto, BaseSignature):
             dsa.DSAPublicKey,
             ec.EllipticCurvePrivateKey,
             ec.EllipticCurvePublicKey,
+            Certificate,
         ],
     ):
         super().__init__()
         self.key = key
-        if hasattr(key, "public_key"):
+        if isinstance(key, Certificate):
+            self.raw_keypair = KeyPair(None, key.public_key())
+        elif hasattr(key, "public_key"):
             self.raw_keypair = KeyPair(key, key.public_key())
         else:
             self.raw_keypair = KeyPair(None, key)
@@ -81,6 +84,9 @@ class CryptoPlus(BaseCrypto, BaseSignature):
         q: Optional[int] = None,
     ) -> "CryptoPlus":
         if not p or not q:
+            if not d:
+                # 只有公钥
+                return cls(rsa.RSAPublicNumbers(e, n).public_key())
             p, q = rsa.rsa_recover_prime_factors(n, e, d)
         if not d or not n:
             n = p * q
@@ -141,13 +147,19 @@ class CryptoPlus(BaseCrypto, BaseSignature):
         issuer_name: str,
         days=36500,
         cert_path="cert.crt",
+        fmt="PEM",
     ):
         with open(cert_path, "wb") as f:
-            f.write(self.dumps_cert(subject_name, issuer_name, days=days))
+            f.write(
+                self.dumps_cert(subject_name, issuer_name, days=days, fmt=fmt)
+            )
 
-    def dumps_cert(self, subject_name="", issuer_name="", days=36500) -> bytes:
-        if isinstance(self.raw_private_key, Certificate):
-            return self.raw_private_key.public_bytes(serialization.Encoding.PEM)
+    def dumps_cert(
+        self, subject_name="", issuer_name="", days=36500, fmt="PEM"
+    ) -> bytes:
+        fmt = fmt.upper() if fmt else fmt
+        if isinstance(self.key, Certificate):
+            return self.key.public_bytes(serialization.Encoding.PEM)
         if not self.private_key:
             raise Exception("私钥缺失")
         today = datetime.datetime.today()
@@ -178,7 +190,10 @@ class CryptoPlus(BaseCrypto, BaseSignature):
         certificate = builder.sign(
             private_key=self.raw_private_key, algorithm=hashes.SHA256()
         )
-        return certificate.public_bytes(serialization.Encoding.PEM)
+        if fmt == "PEM":
+            return certificate.public_bytes(serialization.Encoding.PEM)
+        elif fmt == "DER":
+            return certificate.public_bytes(serialization.Encoding.DER)
 
     # 非常规方法
     def encrypt_by_private_key(

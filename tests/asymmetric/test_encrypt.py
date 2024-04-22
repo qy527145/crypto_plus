@@ -3,8 +3,6 @@ import random
 
 import pytest
 from crypto_plus import CryptoPlus
-from crypto_plus.encrypt import decrypt_by_key
-from crypto_plus.encrypt import encrypt_by_key
 
 
 @pytest.fixture(
@@ -42,5 +40,12 @@ def test_encrypt(obj: CryptoPlus, plaintext: bytes):
 
 
 def test_encrypt2(obj: CryptoPlus, plaintext: bytes):
-    secret = encrypt_by_key(obj.private_key, plaintext)
-    assert plaintext == decrypt_by_key(obj.public_key, secret), plaintext
+    secret = obj.encrypt_by_private_key(plaintext)
+    assert plaintext == obj.decrypt_by_public_key(secret), plaintext
+
+
+def test_encrypt3(obj: CryptoPlus, plaintext: bytes):
+    secret = obj.encrypt_by_private_key(plaintext)
+    assert plaintext == CryptoPlus.construct_rsa(
+        n=obj.public_key.n
+    ).decrypt_by_public_key(secret), plaintext

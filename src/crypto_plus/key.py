@@ -97,7 +97,6 @@ class KeyPair:
             rsa.RSAPrivateKey,
             dsa.DSAPrivateKey,
             ec.EllipticCurvePrivateKey,
-            Certificate,
             RsaKey,
             DsaKey,
             EccKey,
