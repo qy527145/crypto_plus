@@ -79,7 +79,7 @@ def encrypt_by_key(key, message: bytes, *args, **kwargs):
 def _(key: RsaKey, message: bytes, **kwargs):
     pad = 8
     max_segment_len = key.size_in_bytes() - pad - 3
-    random_padding = kwargs.get("random", False)
+    padding_mode = kwargs.get("padding_mode", 1)
     res = []
     if key.has_private():
         # 私钥加密（不建议）
@@ -91,7 +91,21 @@ def _(key: RsaKey, message: bytes, **kwargs):
             ]
             pad_len = key.size_in_bytes() - len(plaintext_part) - 3
             # 填充后加密
-            if random_padding:
+            if padding_mode == 0:
+                # 00填充
+                plaintext_part_padding = bytes_to_long(
+                    bytes.fromhex(
+                        f'0000{"00" * pad_len}00{plaintext_part.hex()}'
+                    )
+                )
+            elif padding_mode == 1:
+                # ff填充
+                plaintext_part_padding = bytes_to_long(
+                    bytes.fromhex(
+                        f'0001{"ff" * pad_len}00{plaintext_part.hex()}'
+                    )
+                )
+            else:
                 # 随机填充
                 # 生成范围在1到255之间的随机数，确保非零字节
                 rand_pads = bytearray(pad_len)
@@ -102,13 +116,6 @@ def _(key: RsaKey, message: bytes, **kwargs):
                     # bytes.fromhex(f'0001{"ff" * pad_len}00{plaintext_part.hex()}')
                     bytes.fromhex(
                         f"0002{rand_pads.hex()}00{plaintext_part.hex()}"
-                    )
-                )
-            else:
-                # ff填充
-                plaintext_part_padding = bytes_to_long(
-                    bytes.fromhex(
-                        f'0001{"ff" * pad_len}00{plaintext_part.hex()}'
                     )
                 )
             ciphertext_part = _fast_pow(plaintext_part_padding)
@@ -143,6 +150,8 @@ def decrypt_by_key(key, message, *args, **kwargs):
 @decrypt_by_key.register(RsaKey)
 def _(key: RsaKey, message: bytes, **kwargs):
     seg_len = key.size_in_bytes()
+    pad = 8
+    max_segment_len = seg_len - pad - 3
     res = []
     if key.has_private():
         cipher = PKCS1_v1_5_Cipher.new(key)
@@ -160,9 +169,28 @@ def _(key: RsaKey, message: bytes, **kwargs):
                 key.size_in_bytes(),
             )
             # 去除填充字节
-            plaintext_part = plaintext_part[
-                plaintext_part.find(b"\x00", 10) + 1 :
-            ]
+            if plaintext_part[1] in [1, 2]:
+                plaintext_part = plaintext_part[
+                    plaintext_part.find(b"\x00", 10) + 1 :
+                ]
+            elif plaintext_part[1] == 0:
+                plaintext_part = plaintext_part.lstrip(b"\x00")
+                for ch in plaintext_part:
+                    if not 32 <= ch <= 126:
+                        # 存在非可见字符就尝试补全误删的00前缀
+                        if len(
+                            plaintext_part
+                        ) < max_segment_len and not message.endswith(
+                            ciphertext_part
+                        ):
+                            plaintext_part = (
+                                b"\x00"
+                                * (max_segment_len - len(plaintext_part))
+                                + plaintext_part
+                            )
+                        break
+            else:
+                plaintext_part = plaintext_part.lstrip(b"\x00")
             res.append(plaintext_part)
     return b"".join(res)
 

@@ -49,3 +49,13 @@ def test_encrypt3(obj: CryptoPlus, plaintext: bytes):
     assert plaintext == CryptoPlus.construct_rsa(
         n=obj.public_key.n
     ).decrypt_by_public_key(secret), plaintext
+
+
+def test_encrypt4(obj: CryptoPlus, plaintext: bytes):
+    secret = obj.encrypt_by_private_key(plaintext, 0)
+    assert plaintext == obj.decrypt_by_public_key(secret), plaintext
+
+
+def test_encrypt5(obj: CryptoPlus, plaintext: bytes):
+    secret = obj.encrypt_by_private_key(plaintext, 2)
+    assert plaintext == obj.decrypt_by_public_key(secret), plaintext

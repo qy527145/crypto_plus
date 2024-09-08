@@ -111,7 +111,7 @@ class CryptoPlus(BaseCrypto, BaseSignature):
     # ECDSA
     @classmethod
     def generate_ecdsa(
-        cls, curve: ec.EllipticCurve = ec.SECP256R1
+        cls, curve: ec.EllipticCurve = ec.SECP256R1()
     ) -> "CryptoPlus":
         key = ec.generate_private_key(curve)
         return cls(key)
@@ -196,14 +196,20 @@ class CryptoPlus(BaseCrypto, BaseSignature):
             return certificate.public_bytes(serialization.Encoding.DER)
 
     # 非常规方法
-    def encrypt_by_private_key(
-        self, message: bytes, random_padding=False
-    ) -> bytes:
+    def encrypt_by_private_key(self, message: bytes, padding_mode=1) -> bytes:
+        """
+        私钥加密
+        :param message: 明文
+        :param padding_mode: 填充模式（0、00填充；1、ff填充；2、随机填充）
+        :return:
+        """
         if not message:
             return b""
         if not self.private_key:
             raise Exception("私钥缺失")
-        return encrypt_by_key(self.private_key, message, random=random_padding)
+        return encrypt_by_key(
+            self.private_key, message, padding_mode=padding_mode
+        )
 
     def decrypt_by_public_key(self, message: bytes) -> bytes:
         if not message:
