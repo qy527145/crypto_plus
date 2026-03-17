@@ -1,8 +1,6 @@
 import functools
 from base64 import b64decode
 from os.path import exists
-from typing import Optional
-from typing import Union
 
 from Crypto.PublicKey import DSA
 from Crypto.PublicKey import ECC
@@ -19,7 +17,7 @@ from cryptography.x509 import load_der_x509_certificate
 from cryptography.x509 import load_pem_x509_certificate
 
 
-def loads_key(key_bytes: Union[bytes, str], password: Optional[bytes] = None):
+def loads_key(key_bytes: bytes | str, password: bytes | None = None):
     if isinstance(key_bytes, str):
         if key_bytes.startswith("-----"):
             key_bytes = key_bytes.encode()
@@ -69,20 +67,20 @@ def loads_key(key_bytes: Union[bytes, str], password: Optional[bytes] = None):
 
 
 def dumps_key(
-    key: Union[RsaKey, DsaKey, EccKey], key_format="PEM"
-) -> Union[bytes, str]:
+    key: RsaKey | DsaKey | EccKey, key_format="PEM"
+) -> bytes | str:
     return key.export_key(format=key_format)
 
 
-def load_key(key_path: str, password: Optional[bytes] = None):
+def load_key(key_path: str, password: bytes | None = None):
     if not exists(key_path):
         raise Exception(f"{key_path} not found")
     with open(key_path, "rb") as f:
-        return loads_key(f.read())
+        return loads_key(f.read(), password)
 
 
 def dump_key(
-    key: Union[RsaKey, DsaKey, EccKey], path="rsa.key", key_format="PEM"
+    key: RsaKey | DsaKey | EccKey, path="rsa.key", key_format="PEM"
 ):
     with open(path, "wb") as key_file:
         data = key.export_key(format=key_format)
@@ -93,22 +91,8 @@ def dump_key(
 
 class KeyPair:
     def __init__(self, private_key, public_key):
-        self.private_key: Union[
-            rsa.RSAPrivateKey,
-            dsa.DSAPrivateKey,
-            ec.EllipticCurvePrivateKey,
-            RsaKey,
-            DsaKey,
-            EccKey,
-        ] = private_key
-        self.public_key: Union[
-            rsa.RSAPublicKey,
-            dsa.DSAPublicKey,
-            ec.EllipticCurvePublicKey,
-            RsaKey,
-            DsaKey,
-            EccKey,
-        ] = public_key
+        self.private_key: rsa.RSAPrivateKey | dsa.DSAPrivateKey | ec.EllipticCurvePrivateKey | RsaKey | DsaKey | EccKey = private_key
+        self.public_key: rsa.RSAPublicKey | dsa.DSAPublicKey | ec.EllipticCurvePublicKey | RsaKey | DsaKey | EccKey = public_key
 
 
 @functools.singledispatch

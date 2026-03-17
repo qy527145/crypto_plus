@@ -1,7 +1,6 @@
 import functools
 import random
 from abc import abstractmethod
-from typing import Union
 
 from Crypto.Cipher import PKCS1_v1_5 as PKCS1_v1_5_Cipher
 from Crypto.Math.Numbers import Integer
@@ -14,7 +13,7 @@ from Crypto.Util.number import long_to_bytes
 from crypto_plus.base import Base
 
 
-def fast_pow(base: Union[Integer, int], exponent: int, p: int, q: int):
+def fast_pow(base: Integer | int, exponent: int, p: int, q: int):
     # 加速模幂运算
     # return pow(base, exponent, p * q)
     # 扩展辗转相除（比pow快3倍左右）
@@ -38,7 +37,7 @@ def fast_pow_factor(key: RsaKey):
     r = random.randint(1, n)
     _r = fast_pow(r, -1, p, q)
 
-    def _fast_pow1(base: Union[Integer, int]):
+    def _fast_pow1(base: Integer | int):
         cp = base * fast_pow(r, e, p, q) % n
         m1 = pow(cp, dp, p)
         m2 = pow(cp, dq, q)
@@ -49,7 +48,7 @@ def fast_pow_factor(key: RsaKey):
     def _fast_pow2(base: int):
         return _fast_pow1(Integer(base))
 
-    def _fast_pow3(base: Union[Integer, int]):
+    def _fast_pow3(base: Integer | int):
         mp = pow(base, dp, p)
         mq = pow(base, dq, q)
         return (mq * _p % n + mp * _q % n) % n
@@ -95,14 +94,14 @@ def _(key: RsaKey, message: bytes, **kwargs):
                 # 00填充
                 plaintext_part_padding = bytes_to_long(
                     bytes.fromhex(
-                        f'0000{"00" * pad_len}00{plaintext_part.hex()}'
+                        f"0000{'00' * pad_len}00{plaintext_part.hex()}"
                     )
                 )
             elif padding_mode == 1:
                 # ff填充
                 plaintext_part_padding = bytes_to_long(
                     bytes.fromhex(
-                        f'0001{"ff" * pad_len}00{plaintext_part.hex()}'
+                        f"0001{'ff' * pad_len}00{plaintext_part.hex()}"
                     )
                 )
             else:
@@ -138,7 +137,7 @@ def _(key: RsaKey, message: bytes, **kwargs):
 
 @encrypt_by_key.register(DsaKey)
 @encrypt_by_key.register(EccKey)
-def _(key: Union[DsaKey, EccKey], message: bytes, **kwargs):
+def _(key: DsaKey | EccKey, message: bytes, **kwargs):
     raise NotImplementedError(f"Not implemented type: {type(key)}")
 
 
@@ -197,5 +196,5 @@ def _(key: RsaKey, message: bytes, **kwargs):
 
 @decrypt_by_key.register(DsaKey)
 @decrypt_by_key.register(EccKey)
-def _(key: Union[DsaKey, EccKey], message: bytes, **kwargs):
+def _(key: DsaKey | EccKey, message: bytes, **kwargs):
     raise NotImplementedError(f"Not implemented type: {type(key)}")

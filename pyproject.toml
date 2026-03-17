@@ -1,43 +1,41 @@
-[tool.poetry]
+[project]
 name = "crypto_plus"
-version = "1.0.6"
+version = "1.0.7"
 description = "A Easy-to-use Crypto Tool"
 readme = "README.md"
-authors = ["wmymz <wmymz@icloud.com>"]
+authors = [
+    { name = "wmymz", email = "wmymz@icloud.com" }
+]
 license = "MIT"
 classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.12",
 ]
+requires-python = ">=3.6"
 
-[tool.poetry.dependencies]
-#python = ">=3.6"
-python = ">=3.12"
-cryptography = "*"
-pycryptodome = "*"
+dependencies = [
+    "cryptography",
+    "pycryptodome",
+]
 
-[tool.poetry.group.dev.dependencies]
-pytest = "*"
-tox = "*"
-mkdocs = "*"
-mkdocs-material = "*"
-ruff = "*"
-pre-commit = "*"
-
-
-[tool.poetry.scripts]
+[dependency-groups]
+dev = [
+    "pytest",
+    "tox",
+    "mkdocs",
+    "mkdocs-material",
+    "ruff",
+    "pre-commit",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.10.10,<0.11.0"]
+build-backend = "uv_build"
+
 [tool.pytest.ini_options]
 testpaths = "tests"
 python_files = "tests.py test_*.py *_tests.py"
 
-[[tool.poetry.source]]
-name = "tsinghua"
-url = "https://pypi.tuna.tsinghua.edu.cn/simple"
-priority = "primary"
 
 [tool.ruff]
 line-length = 80

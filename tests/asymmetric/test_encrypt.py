@@ -2,6 +2,7 @@ import os
 import random
 
 import pytest
+
 from crypto_plus import CryptoPlus
 
 

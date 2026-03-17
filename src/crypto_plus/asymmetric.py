@@ -1,6 +1,4 @@
 import datetime
-from typing import Optional
-from typing import Union
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
@@ -31,15 +29,7 @@ from crypto_plus.sign import verify_by_key
 class CryptoPlus(BaseCrypto, BaseSignature):
     def __init__(
         self,
-        key: Union[
-            rsa.RSAPrivateKey,
-            rsa.RSAPublicKey,
-            dsa.DSAPrivateKey,
-            dsa.DSAPublicKey,
-            ec.EllipticCurvePrivateKey,
-            ec.EllipticCurvePublicKey,
-            Certificate,
-        ],
+        key: rsa.RSAPrivateKey | rsa.RSAPublicKey | dsa.DSAPrivateKey | dsa.DSAPublicKey | ec.EllipticCurvePrivateKey | ec.EllipticCurvePublicKey | Certificate,
     ):
         super().__init__()
         self.key = key
@@ -78,10 +68,10 @@ class CryptoPlus(BaseCrypto, BaseSignature):
         cls,
         *,
         e=65537,
-        d: Optional[int] = None,
-        n: Optional[int] = None,
-        p: Optional[int] = None,
-        q: Optional[int] = None,
+        d: int | None = None,
+        n: int | None = None,
+        p: int | None = None,
+        q: int | None = None,
     ) -> "CryptoPlus":
         if not p or not q:
             if not d:
@@ -134,11 +124,15 @@ class CryptoPlus(BaseCrypto, BaseSignature):
         return private_key, public_key
 
     @classmethod
-    def load(cls, key_path="key.pem", password=None) -> "CryptoPlus":
+    def load(
+        cls, key_path="key.pem", password: bytes | None = None
+    ) -> "CryptoPlus":
         return cls(load_key(key_path, password))
 
     @classmethod
-    def loads(cls, key: Union[bytes, str], password=None) -> "CryptoPlus":
+    def loads(
+        cls, key: bytes | str, password: bytes | None = None
+    ) -> "CryptoPlus":
         return cls(loads_key(key, password))
 
     def dump_cert(

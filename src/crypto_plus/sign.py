@@ -1,6 +1,5 @@
 import functools
 from abc import abstractmethod
-from typing import Union
 
 from Crypto import Hash
 from Crypto.PublicKey.DSA import DsaKey
@@ -39,7 +38,7 @@ def _(key: "RsaKey", message, hash_algorithm="SHA256", **kwargs) -> bytes:
 @sign_by_key.register(DsaKey)
 @sign_by_key.register(EccKey)
 def _(
-    key: Union[DsaKey, EccKey],
+    key: DsaKey | EccKey,
     message,
     hash_algorithm="SHA256",
     random_k=True,
