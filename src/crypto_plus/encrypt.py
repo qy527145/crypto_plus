@@ -3,6 +3,7 @@ import random
 from abc import abstractmethod
 
 from Crypto.Cipher import PKCS1_v1_5 as PKCS1_v1_5_Cipher
+from Crypto.Cipher import PKCS1_OAEP as PKCS1_OAEP_Cipher
 from Crypto.Math.Numbers import Integer
 from Crypto.PublicKey.DSA import DsaKey
 from Crypto.PublicKey.ECC import EccKey
@@ -158,6 +159,14 @@ def _(key: RsaKey, message: bytes, **kwargs):
             res.append(
                 cipher.decrypt(message[i * seg_len : (i + 1) * seg_len], None)
             )
+        if not b"".join(res):
+            # 如果不是PKCS1_v1_5填充，则尝试PKCS1_OAEP填充方式
+            res = []
+            cipher = PKCS1_OAEP_Cipher.new(key)
+            for i in range(1 + (len(message) - 1) // seg_len):
+                res.append(
+                    cipher.decrypt(message[i * seg_len : (i + 1) * seg_len])
+                )
     else:
         # 公钥解密（不建议）
         for i in range(1 + (len(message) - 1) // seg_len):

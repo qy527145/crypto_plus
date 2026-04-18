@@ -666,7 +666,7 @@ wheels = [
 
 [[package]]
 name = "crypto-plus"
-version = "1.0.7"
+version = "1.0.8"
 source = { editable = "." }
 dependencies = [
     { name = "cryptography", version = "40.0.2", source = { registry = "https://mirrors.aliyun.com/pypi/simple/" }, marker = "python_full_version < '3.7'" },
